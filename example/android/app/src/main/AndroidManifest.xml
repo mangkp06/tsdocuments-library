@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="biz.cunning.cunning_document_scanner_example">
+    package="ts.tally.document_scanner_example">
     <application
-        android:label="cunning_document_scanner_example"
+        android:label="document_scanner_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

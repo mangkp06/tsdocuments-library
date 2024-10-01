@@ -24,4 +24,18 @@ class CunningDocumentScanner {
     });
     return pictures?.map((e) => e as String).toList();
   }
+
+  static Future<List<String>?> selectDocuments(
+      {int noOfPages = 100}) async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.mediaLibrary,
+    ].request();
+    if (statuses.containsValue(PermissionStatus.denied) ||
+        statuses.containsValue(PermissionStatus.permanentlyDenied)) {
+      throw Exception("Permission not granted");
+    }
+
+    final List<dynamic>? pictures = await _channel.invokeMethod('selectDocuments');
+    return pictures?.map((e) => e as String).toList();
+  }
 }

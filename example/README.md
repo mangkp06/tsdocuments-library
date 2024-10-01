@@ -1,6 +1,6 @@
-# cunning_document_scanner_example
+# document_scanner_example
 
-Demonstrates how to use the cunning_document_scanner plugin.
+Demonstrates how to use the document_scanner plugin.
 
 ## Getting Started
 

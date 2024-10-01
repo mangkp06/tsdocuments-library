@@ -1,5 +1,5 @@
 PODS:
-  - cunning_document_scanner (1.0.0):
+  - document_scanner (1.0.0):
     - Flutter
   - Flutter (1.0.0)
   - path_provider_foundation (0.0.1):
@@ -9,14 +9,14 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - cunning_document_scanner (from `.symlinks/plugins/cunning_document_scanner/ios`)
+  - document_scanner (from `.symlinks/plugins/document_scanner/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
 
 EXTERNAL SOURCES:
-  cunning_document_scanner:
-    :path: ".symlinks/plugins/cunning_document_scanner/ios"
+  document_scanner:
+    :path: ".symlinks/plugins/document_scanner/ios"
   Flutter:
     :path: Flutter
   path_provider_foundation:
@@ -25,7 +25,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
-  cunning_document_scanner: 7cb9bd173f7cc7b11696dde98d01492187fc3a67
+  document_scanner: 7cb9bd173f7cc7b11696dde98d01492187fc3a67
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   permission_handler_apple: 036b856153a2b1f61f21030ff725f3e6fece2b78

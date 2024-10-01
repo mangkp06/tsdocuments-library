@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:cunning_document_scanner_example/main.dart';
+import 'package:document_scanner_example/main.dart';
 
 void main() {
   testWidgets('View is created', (WidgetTester tester) async {

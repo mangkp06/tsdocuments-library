@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:cunning_document_scanner/cunning_document_scanner.dart';
+import 'package:document_scanner/document_scanner.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,6 +38,8 @@ class _MyAppState extends State<MyApp> {
           children: [
             ElevatedButton(
                 onPressed: onPressed, child: const Text("Add Pictures")),
+            ElevatedButton(
+                onPressed: onSelectPicturesSelect, child: const Text("Select Pictures")),
             for (var picture in _pictures) Image.file(File(picture))
           ],
         )),
@@ -45,10 +47,23 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
+  void onSelectPicturesSelect() async {
+    List<String> pictures;
+    try {
+      pictures = await DocumentScanner.selectDocuments(noOfPages: 15) ?? [];
+      if (!mounted) return;
+      setState(() {
+        _pictures = pictures;
+      });
+    } catch (exception) {
+      // Handle exception here
+    }
+  }
+
   void onPressed() async {
     List<String> pictures;
     try {
-      pictures = await CunningDocumentScanner.getPictures() ?? [];
+      pictures = await DocumentScanner.getPictures(noOfPages: 15, isGalleryImportAllowed: true) ?? [];
       if (!mounted) return;
       setState(() {
         _pictures = pictures;

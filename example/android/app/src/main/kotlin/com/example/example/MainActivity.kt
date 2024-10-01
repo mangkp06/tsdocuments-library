@@ -1,4 +1,4 @@
-package biz.cunning.cunning_document_scanner_example
+package ts.tally.document_scanner_example
 
 import io.flutter.embedding.android.FlutterActivity
 

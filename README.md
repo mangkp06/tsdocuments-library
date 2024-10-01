@@ -1,6 +1,6 @@
-# Cunning Document Scanner
+# Document Scanner
 
-Cunning Document Scanner is a Flutter-based document scanner application that enables you to capture images of paper documents and convert them into digital files effortlessly. This application is designed to run on Android and iOS devices with minimum API levels of 21 and 13, respectively.
+Document Scanner is a Flutter-based document scanner application that enables you to capture images of paper documents and convert them into digital files effortlessly. This application is designed to run on Android and iOS devices with minimum API levels of 21 and 13, respectively.
 
 ## Key Features
 
@@ -52,7 +52,7 @@ platform :ios, '13.0'
    <key>NSCameraUsageDescription</key>
    <string>Camera Permission Description</string>
 
-2. The [permission_handler](https://pub.dev/packages/permission_handler) dependency used by cunning_document_scanner use [macros](https://github.com/Baseflow/flutter-permission-handler/blob/master/permission_handler_apple/ios/Classes/PermissionHandlerEnums.h) to control whether a permission is enabled. Add the following to your `Podfile` file:
+2. The [permission_handler](https://pub.dev/packages/permission_handler) dependency used by document_scanner use [macros](https://github.com/Baseflow/flutter-permission-handler/blob/master/permission_handler_apple/ios/Classes/PermissionHandlerEnums.h) to control whether a permission is enabled. Add the following to your `Podfile` file:
 
    ```ruby
    post_install do |installer|
@@ -87,14 +87,14 @@ platform :ios, '13.0'
 The easiest way to get a list of images is:
 
 ```
-    final imagesPath = await CunningDocumentScanner.getPictures()
+    final imagesPath = await DocumentScanner.getPictures()
 ```
 ### Android Specific
 
 There are some features in Android that allow you to adjust the scanner that will be ignored in iOS:
 
 ```
-    final imagesPath = await CunningDocumentScanner.getPictures(
+    final imagesPath = await DocumentScanner.getPictures(
       noOfPages: 1, // Limit the number of pages to 1
       isGalleryImportAllowed, // Allow the user to also pick an image from his gallery
    )
@@ -113,7 +113,7 @@ Before you begin, make sure you have Flutter and Dart installed on your system. 
 2. Navigate to the project directory:
 
    ```bash
-   cd cunning_document_scanner
+   cd document_scanner
    ```
 
 3. Install dependencies:
@@ -130,7 +130,7 @@ Before you begin, make sure you have Flutter and Dart installed on your system. 
 
 ## Contributions
 
-Contributions are welcome. If you want to contribute to the development of Cunning Document Scanner, follow these steps:
+Contributions are welcome. If you want to contribute to the development of Document Scanner, follow these steps:
 
 1. Fork the repository.
 2. Create a branch for your contribution: `git checkout -b your_feature`
