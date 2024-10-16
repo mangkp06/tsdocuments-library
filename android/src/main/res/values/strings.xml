@@ -1,3 +1,11 @@
 <resources>
     <string name="image_with_cropper">Original Image With Cropper</string>
+    <string name="delete">Delete</string>
+    <string name="rotate">Rotate</string>
+    <string name="cropRotate">Crop &amp; Rotate</string>
+    <string name="txt_add_image">Add Image</string>
+    <string name="txt_back">Back</string>
+    <string name="txt_preview">Preview</string>
+    <string name="txt_done">Done</string>
+    <string name="txt_retake">Retake</string>
 </resources>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context=".fallback.DocumentScannerActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/gray"
+            app:title="@string/cropRotate"
+            app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+            style="@style/Widget.Material3.AppBarLayout"
+            />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+
+
+
+    <ts.tally.document_scanner.fallback.ui.ImageCropView
+        android:id="@+id/crop_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:contentDescription="@string/image_with_cropper"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
+        app:layout_constraintBottom_toTopOf="@+id/lyt_crop_bottom_layout"/>
+
+    <RelativeLayout
+        android:id="@+id/lyt_crop_bottom_layout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray"
+        android:paddingTop="40dp"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.25">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_auto_crop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Auto Crop"
+            android:textColor="@android:color/white"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_toLeftOf="@+id/btn_no_crop"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableTop="@drawable/ic_crop"
+            android:drawableTint="@android:color/white"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_no_crop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No Crop"
+            android:textColor="@android:color/white"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_centerHorizontal="true"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableTop="@drawable/ic_no_crop"
+            android:drawableTint="@android:color/white"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_rotate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rotate"
+            android:textColor="@android:color/white"
+            style="@style/Widget.Material3.Button.TextButton"
+            android:layout_toRightOf="@+id/btn_no_crop"
+            android:backgroundTint="@android:color/transparent"
+            android:drawableTop="@drawable/ic_rotate"
+            android:drawableTint="@android:color/white"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_apply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apply"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:layout_below="@+id/btn_no_crop"
+            android:layout_alignParentEnd="true"/>
+
+    </RelativeLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

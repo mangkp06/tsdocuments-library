@@ -1,0 +1,14 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_crop"
+        android:icon="@drawable/ic_crop"
+        android:title="@string/cropRotate" />
+    <item
+        android:id="@+id/retake_photo_button"
+        android:icon="@drawable/ic_camera"
+        android:title="@string/txt_retake" />
+    <item
+        android:id="@+id/action_delete"
+        android:icon="@drawable/ic_delete"
+        android:title="@string/delete" />
+</menu>

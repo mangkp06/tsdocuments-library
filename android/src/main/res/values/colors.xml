@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="gray">#1C1C1C</color>
+    <color name="lightGray">#AEAEAE</color>
+    <color name="colorPrimary">#3066b1</color>
     <color name="done_button_inner_circle_color">#D0E4FF</color>
 </resources>

@@ -1,4 +1,4 @@
-package biz.cunning.cunning_document_scanner.fallback.utils
+package ts.tally.document_scanner.fallback.utils
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -46,13 +46,14 @@ class DocumentProviderUtil(
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 result.data?.data?.also { uri ->
+                    Log.e("URI",uri.path!!);
                     val mimeType = activity.contentResolver.getType(uri)
-                    val cachedFile = copyFileToCache(activity.baseContext, uri)
-                    val filePath = cachedFile?.absolutePath
+                   val cachedFile = copyFileToCache(activity.baseContext, uri)
+                   val filePath = cachedFile?.absolutePath
 
-                    val filePaths = documentUtil.getPathFromUri(activity.baseContext, uri)
-                    Log.e("PATH 1: ", filePath!!)
-                    Log.e("PATH 2: ", filePaths!!)
+                    // val filePaths = documentUtil.getPathFromUri(activity.applicationContext, uri)
+                   Log.e("URI PATH 1: ", filePath!!)
+                    // Log.e("PATH 2: ", filePaths!!)
                     // send back photo file path on capture success
                     onDocumentSelectSuccess(filePath)
                 }

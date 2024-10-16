@@ -10,6 +10,7 @@ import ts.tally.document_scanner.fallback.constants.DocumentScannerExtra
 import com.google.mlkit.common.MlKitException
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.RESULT_FORMAT_JPEG
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_BASE
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions.SCANNER_MODE_FULL
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
@@ -106,7 +107,8 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             handled = true
                         }
                     }
-                } else {
+                }
+                else {
                     when (resultCode) {
                         Activity.RESULT_OK -> {
                             // check for errors
@@ -178,7 +180,7 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             .setGalleryImportAllowed(isGalleryImportAllowed)
             .setPageLimit(noOfPages)
             .setResultFormats(RESULT_FORMAT_JPEG)
-            .setScannerMode(SCANNER_MODE_FULL)
+            .setScannerMode(SCANNER_MODE_BASE)
             .build()
         val scanner = GmsDocumentScanning.getClient(options)
         scanner.getStartScanIntent(activity).addOnSuccessListener {

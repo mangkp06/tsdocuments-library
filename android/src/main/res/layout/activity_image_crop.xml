@@ -12,6 +12,7 @@
         android:id="@+id/image_view"
         android:layout_width="match_parent"
         android:layout_height="@dimen/image_crop_view_initial_height"
+        android:weightSum="0.4"
         android:contentDescription="@string/image_with_cropper" />
 
     <LinearLayout
@@ -48,12 +49,12 @@
 
             <ts.tally.document_scanner.fallback.ui.DoneButton
                 android:id="@+id/complete_document_scan_button"
-                android:layout_gravity="center"
                 android:layout_width="@dimen/large_button_diameter"
                 android:layout_height="@dimen/large_button_diameter"
+                android:layout_gravity="center"
                 android:background="@android:color/transparent"
-                android:stateListAnimator="@animator/button_grow_animation"
-                android:src="@drawable/ic_baseline_check_24" />
+                android:src="@drawable/ic_baseline_check_24"
+                android:stateListAnimator="@animator/button_grow_animation" />
 
         </FrameLayout>
 

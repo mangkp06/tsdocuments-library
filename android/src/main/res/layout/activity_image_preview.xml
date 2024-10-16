@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/Theme.Material3.Dark.NoActionBar"
+    android:background="@color/black">
+
+    <include android:id="@+id/lyt_crop_layout"
+        layout="@layout/layout_image_crop"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:visibility="gone"></include>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lyt_preview_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <!-- Top Bar with Back Button, Title, and Done Button -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_white_close"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/txt_back" />
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/txt_preview"
+            android:textSize="22sp"
+            android:layout_gravity="left"/>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.Material3.Button"
+            android:id="@+id/complete_document_scan_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/txt_done"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:layout_marginEnd="8dp"
+            android:layout_gravity="end"/>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- Main Carousel for Image Preview -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/preview_carousel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/lyt_bottom_layout"
+        android:clipToPadding="false"
+        android:scrollbars="horizontal"/>
+
+    <LinearLayout
+        android:id="@+id/lyt_bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_default="percent"
+        app:layout_constraintHeight_percent="0.25"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
+        <TextView
+            android:id="@+id/txt_pager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="2/2"
+            android:textSize="16sp" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/thumbnail_carousel"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="horizontal"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:layout_marginTop="24dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal"/>
+    </LinearLayout>
+
+    <!-- Bottom Navigation for Image Actions -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/gray"
+        app:menu="@menu/image_action_menu"
+        app:labelVisibilityMode="labeled"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

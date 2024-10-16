@@ -1,5 +1,7 @@
 package ts.tally.document_scanner.fallback.models
 
+import android.net.Uri
+
 /**
  * This class contains the original document photo, and a cropper. The user can drag the corners
  * to make adjustments to the detected corners.
@@ -12,6 +14,7 @@ package ts.tally.document_scanner.fallback.models
  */
 class Document(
     val originalPhotoFilePath: String,
+    var croppedPhotoUri: String?,
     private val originalPhotoWidth: Int,
     val originalPhotoHeight: Int,
     var corners: Quad

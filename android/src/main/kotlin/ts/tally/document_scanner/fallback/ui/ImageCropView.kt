@@ -120,7 +120,7 @@ class ImageCropView(context: Context, attrs: AttributeSet) : AppCompatImageView(
         // set a cap on imagePreviewHeight, so that the bottom buttons container isn't hidden
         imagePreviewHeight = Integer.min(
             imagePreviewHeight,
-            screenHeight - buttonsViewMinHeight
+            (screenHeight * 0.60f).toInt()
         )
 
         imagePreviewWidth = screenWidth
