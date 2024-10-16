@@ -1,15 +1,15 @@
 # Document Scanner
 
-Document Scanner is a Flutter-based document scanner application that enables you to capture images of paper documents and convert them into digital files effortlessly. This application is designed to run on Android and iOS devices with minimum API levels of 21 and 13, respectively.
+Document Scanner is a Flutter-based document scanner application that enables you to capture images of paper documents and convert them into digital files effortlessly. This application is designed to run on Android and iOS devices with minimum API levels of 24 and 13, respectively.
 
 ## Key Features
 
 - Fast and easy document scanning.
 - Conversion of document images into digital files.
 - Support for both Android and iOS platforms.
-- Minimum requirements: API 21 on Android, iOS 13 on iOS.
+- Minimum requirements: API 24 on Android, iOS 13 on iOS.
 - Limit the number of scannable files on Android.
-- Allows selection of images from the gallery on Android.
+- Allows selection of images from the Files on Android.
 
 A state of the art document scanner with automatic cropping function.
 
@@ -107,7 +107,7 @@ Before you begin, make sure you have Flutter and Dart installed on your system. 
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/jachzen/cunning_document_scanner.git
+   git clone https://github.com/vivekkts/ts-document-scanner.git
    ```
 
 2. Navigate to the project directory:
@@ -140,7 +140,7 @@ Contributions are welcome. If you want to contribute to the development of Docum
 
 ## Issues and Support
 
-If you encounter any issues or have questions, please open an [issue](https://github.com/jachzen/cunning_document_scanner/issues). We're here to help.
+If you encounter any issues or have questions, please open an [issue](https://github.com/vivekkts/ts-document-scanner/issues). We're here to help.
 
 ## License
 

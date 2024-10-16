@@ -24,7 +24,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 
 
-/** CunningDocumentScannerPlugin */
+/** DocumentScannerPlugin */
 class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private var delegate: PluginRegistry.ActivityResultListener? = null
     private var binding: ActivityPluginBinding? = null
