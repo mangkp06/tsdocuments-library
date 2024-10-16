@@ -60,7 +60,9 @@ class DocumentProviderUtil(
             }
             Activity.RESULT_CANCELED -> {
                 // delete the photo since the user didn't finish taking the photo
-                File(documentPath).delete()
+                if (documentPath != null) {
+                    File(documentPath).delete()
+                }
                 onCancelDocumentSelect()
             }
         }
