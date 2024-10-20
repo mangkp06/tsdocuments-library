@@ -591,6 +591,7 @@ class DocumentScannerActivity : AppCompatActivity() {
 //                val croppedImageFile = FileUtil().createImageFile(this, pageNumber)
 //                croppedImage.saveToFile(croppedImageFile, croppedImageQuality)
 //                croppedImageResults.add(Uri.fromFile(croppedImageFile).toString())
+            document.croppedPhotoUri?.let { croppedImageResults.add(it) }
 //            } catch (exception: Exception) {
 //                finishIntentWithError(
 //                    "unable to save cropped image: ${exception.message}"
