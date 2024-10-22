@@ -197,6 +197,7 @@ class DocumentScannerActivity : AppCompatActivity() {
 
                 Log.e("FROM ANDROID", "5 " + filePath)
                 if (FileUtil().getMimeType(filePath) == "application/pdf") {
+                    Log.e("FROM ANDROID", "5.1 MimeType PDF");
                     val results = arrayListOf<String>()
                     filePath?.let { results.add(it) }
                     setResult(
@@ -206,6 +207,7 @@ class DocumentScannerActivity : AppCompatActivity() {
                     finish()
                     return@DocumentProviderUtil
                 }
+                Log.e("FROM ANDROID", "5.2 SHOULD HAVE RETURNED");
                 // get bitmap from photo file path
                 val photo: Bitmap? = try {
                     ImageUtil().getImageFromFilePath(filePath!!)

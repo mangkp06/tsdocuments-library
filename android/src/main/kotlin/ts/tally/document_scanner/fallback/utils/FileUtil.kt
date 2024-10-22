@@ -1,6 +1,8 @@
 package ts.tally.document_scanner.fallback.utils
 
+import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import java.io.File
@@ -41,10 +43,16 @@ class FileUtil {
 
     fun getMimeType(url: String?): String? {
         var type: String? = null
-        val extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(url)).toString())
+        val extension = url.let {
+             MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(it)).toString())
+        }
+
+        Log.e("FROM ANDROID", extension);
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         }
+        Log.e("FROM ANDROID", type!!);
+
         return type
     }
 }
