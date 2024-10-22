@@ -1,12 +1,14 @@
 package ts.tally.document_scanner.fallback.utils
 
 import android.os.Environment
+import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.Locale
 import java.util.Date
+import java.util.Locale
+
 
 /**
  * This class contains a helper function creating temporary files
@@ -35,5 +37,14 @@ class FileUtil {
             ".jpg",
             storageDir
         )
+    }
+
+    fun getMimeType(url: String?): String? {
+        var type: String? = null
+        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        if (extension != null) {
+            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        }
+        return type
     }
 }

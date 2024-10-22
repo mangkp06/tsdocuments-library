@@ -46,6 +46,7 @@ import ts.tally.document_scanner.fallback.utils.ImageUtil
 import java.io.File
 
 
+
 /**
  * This class contains the main document scanner code. It opens the camera, lets the user
  * take a photo of a document (homework paper, business card, etc.), detects document corners,
@@ -195,6 +196,16 @@ class DocumentScannerActivity : AppCompatActivity() {
 //                previewLayout?.isVisiF false
 
                 Log.e("FROM ANDROID", "5 " + filePath)
+                if (FileUtil().getMimeType(filePath) == "application/pdf") {
+                    val results = arrayListOf<String>()
+                    filePath?.let { results.add(it) }
+                    setResult(
+                        Activity.RESULT_OK,
+                        Intent().putExtra("croppedImageResults", results)
+                    )
+                    finish()
+                    return@DocumentProviderUtil
+                }
                 // get bitmap from photo file path
                 val photo: Bitmap? = try {
                     ImageUtil().getImageFromFilePath(filePath!!)
@@ -512,6 +523,23 @@ class DocumentScannerActivity : AppCompatActivity() {
                     "unable to save cropped image: ${exception.message}"
                 )
             }
+        }
+
+        binding.previewCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)
+        binding.thumbnailCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)
+
+        previewLayout?.isVisible = true
+        cropLayout?.isVisible = false
+    }
+
+    private fun loadPDFDocument(filePath: String) {
+
+        // get bitmap from photo file path
+        val photo: Bitmap? = try {
+            ImageUtil().getImageFromFilePath(filePath!!)
+        } catch (exception: Exception) {
+            finishIntentWithError("Unable to get bitmap: ${exception.localizedMessage}")
+            return
         }
 
         binding.previewCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:document_scanner/document_scanner.dart';
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -51,6 +52,7 @@ class _MyAppState extends State<MyApp> {
     List<String> pictures;
     try {
       pictures = await DocumentScanner.selectDocuments(noOfPages: 15) ?? [];
+      print("FROM DART ${pictures[0]}");
       if (!mounted) return;
       setState(() {
         _pictures = pictures;
@@ -64,6 +66,7 @@ class _MyAppState extends State<MyApp> {
     List<String> pictures;
     try {
       pictures = await DocumentScanner.getPictures(noOfPages: 15, isGalleryImportAllowed: true) ?? [];
+      
       if (!mounted) return;
       setState(() {
         _pictures = pictures;
