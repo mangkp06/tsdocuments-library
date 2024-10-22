@@ -41,7 +41,7 @@ class FileUtil {
 
     fun getMimeType(url: String?): String? {
         var type: String? = null
-        val extension = MimeTypeMap.getFileExtensionFromUrl(url)
+        val extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(url)).toString())
         if (extension != null) {
             type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
         }

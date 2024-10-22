@@ -1,6 +1,6 @@
 name: document_scanner
 description: A document scanner plugin for flutter. Scan and crop automatically on iOS and Android.
-version: 0.10.4
+version: 0.10.5
 homepage: 
 repository: https://github.com/vivekkts/ts-document-scanner
 
