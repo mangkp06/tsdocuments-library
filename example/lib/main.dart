@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
     List<String> pictures;
     try {
       pictures = await DocumentScanner.selectDocuments(noOfPages: 15) ?? [];
-      print("FROM DART ${pictures[0]}");
+      
       if (!mounted) return;
       setState(() {
         _pictures = pictures;

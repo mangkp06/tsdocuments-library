@@ -4,17 +4,25 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -24,16 +32,20 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.carousel.CarouselLayoutManager
 import com.google.android.material.carousel.CarouselSnapHelper
 import com.google.android.material.carousel.FullScreenCarouselStrategy
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import ts.tally.document_scanner.R
 import ts.tally.document_scanner.databinding.ActivityImagePreviewBinding
 import ts.tally.document_scanner.databinding.PreviewCarouselBinding
 import ts.tally.document_scanner.databinding.ThumbnailCarouselBinding
 import ts.tally.document_scanner.fallback.constants.DefaultSetting
+import ts.tally.document_scanner.fallback.constants.DocumentScannerAction
 import ts.tally.document_scanner.fallback.constants.DocumentScannerExtra
+import ts.tally.document_scanner.fallback.extensions.deselectAllItems
 import ts.tally.document_scanner.fallback.extensions.move
 import ts.tally.document_scanner.fallback.extensions.saveToFile
 import ts.tally.document_scanner.fallback.extensions.screenHeight
 import ts.tally.document_scanner.fallback.extensions.screenWidth
+import ts.tally.document_scanner.fallback.extensions.write
 import ts.tally.document_scanner.fallback.models.Document
 import ts.tally.document_scanner.fallback.models.Point
 import ts.tally.document_scanner.fallback.models.Quad
@@ -44,7 +56,7 @@ import ts.tally.document_scanner.fallback.utils.DocumentUtil
 import ts.tally.document_scanner.fallback.utils.FileUtil
 import ts.tally.document_scanner.fallback.utils.ImageUtil
 import java.io.File
-
+import java.io.FileOutputStream
 
 
 /**
@@ -78,6 +90,8 @@ class DocumentScannerActivity : AppCompatActivity() {
      */
     private var document: Document? = null
 
+    private var documentAction: String = DocumentScannerAction.NONE
+
     /**
      * @property documents a list of documents (original photo file path, original photo
      * dimensions and 4 corner points)
@@ -85,6 +99,8 @@ class DocumentScannerActivity : AppCompatActivity() {
     private val documents = mutableListOf<Document>()
 
     private lateinit var binding : ActivityImagePreviewBinding
+
+    private lateinit var pagerTextView : TextView
 
 
     // Sample list of image URLs or resource IDs
@@ -169,7 +185,8 @@ class DocumentScannerActivity : AppCompatActivity() {
         },
         onCancelPhoto = {
             if (documents.isEmpty()) {
-                onClickCancel()
+                setResult(Activity.RESULT_CANCELED)
+                finish()
             }
         }
     )
@@ -178,7 +195,7 @@ class DocumentScannerActivity : AppCompatActivity() {
      * @property imageView container with original photo and cropper
      */
     private lateinit var imageView: ImageCropView
-    private var selectedPositionForCrop : Int = 0
+    private var selectedPosition : Int = 0
     private var focusedPosition : Int = 0
 
     @SuppressLint("NotifyDataSetChanged")
@@ -233,44 +250,27 @@ class DocumentScannerActivity : AppCompatActivity() {
                     return@DocumentProviderUtil
                 }
 
-                document = Document(filePath, null, photo.width, photo.height, corners)
-                documents.add(document!!)
+                if (documentAction == DocumentScannerAction.ADD) {
+                    document = Document(filePath, null, photo.width, photo.height, corners)
+                    loadCropLayoutForImageAtPosition(position = documents.size)
+                } else if (documentAction == DocumentScannerAction.RETAKE) {
+                    Log.e("FROM ANDROID", "6.1 $focusedPosition")
+                    document = documents[focusedPosition]
+                    Log.e("FROM ANDROID", "6.2")
+                    document?.let {
+                        it.originalPhotoFilePath = filePath
+                        it.originalPhotoWidth = photo.width
+                        it.originalPhotoHeight = photo.height
+                        it.corners = corners
+                    }
 
-                binding.previewCarousel.adapter?.notifyDataSetChanged()
-                binding.thumbnailCarousel.adapter?.notifyDataSetChanged()
-
-                Log.e("FROM ANDROID", "7")
-
-                loadCropLayoutForImageAtPosition(position = documents.size - 1)
-                // user is allowed to move corners to make corrections
-//                try {
-//                    // set preview image height based off of photo dimensions
-//                    imageView.setImagePreviewBounds(photo, screenWidth, screenHeight)
-//
-//                    // display original photo, so user can adjust detected corners
-//                    imageView.setImage(photo)
-//
-//                    // document corner points are in original image coordinates, so we need to
-//                    // scale and move the points to account for blank space (caused by photo and
-//                    // photo container having different aspect ratios)
-//                    val cornersInImagePreviewCoordinates = corners
-//                        .mapOriginalToPreviewImageCoordinates(
-//                            imageView.imagePreviewBounds,
-//                            imageView.imagePreviewBounds.height() / photo.height
-//                        )
-//
-//                    // display cropper, and allow user to move corners
-//                    imageView.setCropper(cornersInImagePreviewCoordinates)
-//                } catch (exception: Exception) {
-//                    finishIntentWithError(
-//                        "unable get image preview ready: ${exception.message}"
-//                    )
-//                    return@DocumentProviderUtil
-//                }
+                    loadCropLayoutForImageAtPosition(position = focusedPosition)
+                }
         },
         onCancelDocumentSelect = {
             if (documents.isEmpty()) {
-                onClickCancel()
+                setResult(Activity.RESULT_CANCELED)
+                finish()
             }
         }
     )
@@ -279,9 +279,8 @@ class DocumentScannerActivity : AppCompatActivity() {
     var cropLayout : ConstraintLayout? = null
 
     private fun loadCropLayoutForImageAtPosition(position: Int) {
-        selectedPositionForCrop = position
+        selectedPosition = position
 
-        document = documents[position]
         imageView = findViewById(R.id.crop_image_view)
         try {
             val photo: Bitmap? = try {
@@ -379,6 +378,12 @@ class DocumentScannerActivity : AppCompatActivity() {
         // set click event handlers for new document button, accept and crop document button,
         // and retake document photo button
         // val newPhotoButton: ImageButton = findViewById(R.id.new_photo_button)
+
+        val cancelButton : ImageButton = findViewById(
+            R.id.back_button
+        )
+        cancelButton.setOnClickListener { onClickCancel() }
+
         val completeDocumentScanButton: MaterialButton = findViewById(
             R.id.complete_document_scan_button
         )
@@ -389,25 +394,62 @@ class DocumentScannerActivity : AppCompatActivity() {
         val topAppBar : MaterialToolbar = findViewById(
             R.id.topAppBar
         )
+        topAppBar.setNavigationOnClickListener {
+            if (documents.count() == 0) {
+                onClickCancel()
+            } else {
+                previewLayout?.isVisible = true
+                cropLayout?.isVisible = false
+            }
+        }
 
+        pagerTextView = findViewById(
+            R.id.txt_pager
+        )
 
-//        val retakePhotoButton: ImageButton = findViewById(R.id.retake_photo_button)
-        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener { menuItem ->
+        val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation)
+        bottomNavigationView.deselectAllItems()
+        bottomNavigationView.menu.get(1).title = "Reselect"
+        bottomNavigationView.setOnItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_crop -> {
                     // Handle Crop action
+                    documentAction = DocumentScannerAction.EDIT
+                    selectedPosition = focusedPosition
+                    document = documents[focusedPosition]
                     loadCropLayoutForImageAtPosition(focusedPosition)
                     true
                 }
                 R.id.retake_photo_button -> {
                     // Handle Rotate action
-                    onClickRetake()
+                    onClickRetake(focusedPosition)
                     true
                 }
                 R.id.action_delete -> {
                     // Handle Delete action
-                    Toast.makeText(this, "Delete Selected", Toast.LENGTH_SHORT).show()
+
+                    val alertBuilder = MaterialAlertDialogBuilder(this)
+                        .setTitle("Delete Page?")
+                        .setMessage("This page will be deleted from your document")
+                        .setPositiveButton("Delete", DialogInterface.OnClickListener { dialogInterface, i ->
+                            document?.let { File(it.originalPhotoFilePath).delete() }
+                            documents.removeAt(focusedPosition)
+
+                            updateUI()
+
+                            if (documents.isEmpty()) {
+                                setResult(Activity.RESULT_CANCELED)
+                                finish()
+                            }
+
+                            dialogInterface.dismiss()
+                        })
+                        .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialogInterface, i ->
+                            dialogInterface.dismiss()
+                        })
+                    alertBuilder.create()
+                    alertBuilder.show()
+
                     true
                 }
                 else -> false
@@ -417,22 +459,107 @@ class DocumentScannerActivity : AppCompatActivity() {
         // newPhotoButton.onClick { onClickNew() }
         completeDocumentScanButton.setOnClickListener { onClickDone() }
         cropApplyButton.setOnClickListener { addSelectedCornersAndOriginalPhotoPathToDocuments() }
-        Log.e("FROM ANDROID", "2")
+
+        val rotateBtn: MaterialButton = findViewById(
+            R.id.btn_rotate
+        )
+        val resetCropBtn: MaterialButton = findViewById(
+            R.id.btn_no_crop
+        )
+
+        rotateBtn.setOnClickListener { onRotateClockwise() }
+        resetCropBtn.setOnClickListener { onResetCrop() }
+
         // open camera, so user can snap document photo
         // Set up the carousel adapters
         setUpPreviewCarousel()
         setUpThumbnailCarousel()
 
         try {
-            // openCamera()
-            openDocumentProvider()
+            openDocumentProvider(DocumentScannerAction.ADD)
             
         } catch (exception: Exception) {
             finishIntentWithError(
                 "error opening camera: ${exception.message}"
             )
         }
+    }
 
+    private fun onRotateClockwise() {
+        Log.e("FROM ANDROID", "ROTATE")
+
+        val matrix = Matrix().apply { postRotate(90f, (imageView.getDrawable().getBounds().width()/2).toFloat(), (imageView.getDrawable().getBounds().height()/2).toFloat()) }
+
+        val currentBitmap = imageView.drawable.toBitmap()
+        val rotatedBitmap = Bitmap.createBitmap(currentBitmap, 0, 0, currentBitmap.width, currentBitmap.height, matrix, true)
+
+        val corners = try {
+            val (topLeft, topRight, bottomLeft, bottomRight) = getDocumentCorners(rotatedBitmap)
+            Quad(topLeft, topRight, bottomRight, bottomLeft)
+        } catch (exception: Exception) {
+            finishIntentWithError(
+                "unable to get document corners: ${exception.message}"
+            )
+            return
+        }
+
+        document?.let {
+            File(it.originalPhotoFilePath).write(rotatedBitmap, quality = 90)
+            it.originalPhotoWidth = rotatedBitmap.width
+            it.originalPhotoHeight = rotatedBitmap.height
+            it.corners = corners
+        }
+
+        // set preview image height based off of photo dimensions
+        imageView.setImagePreviewBounds(rotatedBitmap, screenWidth, screenHeight)
+
+        // display original photo, so user can adjust detected corners
+        imageView.setImage(rotatedBitmap)
+
+        // document corner points are in original image coordinates, so we need to
+        // scale and move the points to account for blank space (caused by photo and
+        // photo container having different aspect ratios)
+        val cornersInImagePreviewCoordinates = document!!.corners
+            .mapOriginalToPreviewImageCoordinates(
+                imageView.imagePreviewBounds,
+                imageView.imagePreviewBounds.height() / rotatedBitmap.height
+            )
+
+        // display cropper, and allow user to move corners
+        imageView.setCropper(cornersInImagePreviewCoordinates)
+    }
+
+    private fun onResetCrop() {
+        Log.e("FROM ANDROID", "9")
+        val currentBitmap = imageView.drawable.toBitmap()
+
+        val corners = try {
+            val (topLeft, topRight, bottomLeft, bottomRight) = getDocumentCorners(currentBitmap)
+            Quad(topLeft, topRight, bottomRight, bottomLeft)
+        } catch (exception: Exception) {
+            finishIntentWithError(
+                "unable to get document corners: ${exception.message}"
+            )
+            return
+        }
+
+        // set preview image height based off of photo dimensions
+        imageView.setImagePreviewBounds(currentBitmap, screenWidth, screenHeight)
+
+        // display original photo, so user can adjust detected corners
+//        imageView.setImage(currentBitmap)
+
+        document?.let {
+            it.corners = corners
+            val cornersInImagePreviewCoordinates = corners
+                .mapOriginalToPreviewImageCoordinates(
+                    imageView.imagePreviewBounds,
+                    imageView.imagePreviewBounds.height() / currentBitmap.height
+                )
+
+            // display cropper, and allow user to move corners
+            imageView.setCropper(cornersInImagePreviewCoordinates)
+        }
     }
 
 
@@ -477,8 +604,9 @@ class DocumentScannerActivity : AppCompatActivity() {
         cameraUtil.openCamera(documents.size)
     }
 
-    private fun openDocumentProvider() {
+    private fun openDocumentProvider(actionType: String) {
         document = null
+        documentAction = actionType
         documentUtil.openDocumentProvider(documents.size)
     }
 
@@ -517,7 +645,7 @@ class DocumentScannerActivity : AppCompatActivity() {
 
             // save cropped document photo
             try {
-                val croppedImageFile = FileUtil().createImageFile(this, selectedPositionForCrop)
+                val croppedImageFile = FileUtil().createImageFile(this, selectedPosition)
                 croppedImage.saveToFile(croppedImageFile, croppedImageQuality)
                 document.croppedPhotoUri = Uri.fromFile(croppedImageFile).toString()
             } catch (exception: Exception) {
@@ -527,11 +655,40 @@ class DocumentScannerActivity : AppCompatActivity() {
             }
         }
 
-        binding.previewCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)
-        binding.thumbnailCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)
+        Log.e("FROM ANDROID", "8.1 $documentAction")
+        if (documentAction == DocumentScannerAction.ADD) {
+            Log.e("FROM ANDROID", "8.2")
+            document?.let {
+                Log.e("FROM ANDROID", "8.3")
+                documents.add(it)
+            }
+            Log.e("FROM ANDROID", "8.4 ${documents.count()}")
+        }
+        Log.e("FROM ANDROID", "8.5 ${documents.count()} $selectedPosition")
+
+        focusedPosition = selectedPosition
+        updateUI(selectedPosition)
+
+        (binding.previewCarousel.layoutManager as CarouselLayoutManager).scrollToPosition(selectedPosition)
 
         previewLayout?.isVisible = true
         cropLayout?.isVisible = false
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun updateUI(position: Int = -1) {
+
+        if (position >= 0) {
+            "${position+1}/${documents.count()}".also { pagerTextView.text = it }
+
+            binding.previewCarousel.adapter?.notifyItemChanged(position)
+            binding.thumbnailCarousel.adapter?.notifyItemChanged(position)
+        } else {
+            "${focusedPosition+1}/${documents.count()}".also { pagerTextView.text = it }
+
+            binding.previewCarousel.adapter?.notifyDataSetChanged()
+            binding.thumbnailCarousel.adapter?.notifyDataSetChanged()
+        }
     }
 
     private fun loadPDFDocument(filePath: String) {
@@ -544,8 +701,8 @@ class DocumentScannerActivity : AppCompatActivity() {
             return
         }
 
-        binding.previewCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)
-        binding.thumbnailCarousel.adapter?.notifyItemChanged(selectedPositionForCrop)
+        binding.previewCarousel.adapter?.notifyItemChanged(selectedPosition)
+        binding.thumbnailCarousel.adapter?.notifyItemChanged(selectedPosition)
 
         previewLayout?.isVisible = true
         cropLayout?.isVisible = false
@@ -574,10 +731,10 @@ class DocumentScannerActivity : AppCompatActivity() {
      * This gets called when a user presses the retake photo button. The user presses this in
      * case the original document photo isn't good, and they need to take it again.
      */
-    private fun onClickRetake() {
+    private fun onClickRetake(position: Int) {
         // we're going to retake the photo, so delete the one we just took
-        document?.let { document -> File(document.originalPhotoFilePath).delete() }
-        openCamera()
+
+        openDocumentProvider(DocumentScannerAction.RETAKE)
     }
 
     /**
@@ -585,8 +742,20 @@ class DocumentScannerActivity : AppCompatActivity() {
      * For example a user can quit out of the camera before snapping a photo of the document.
      */
     private fun onClickCancel() {
-        setResult(Activity.RESULT_CANCELED)
-        finish()
+        val alertBuilder = MaterialAlertDialogBuilder(this)
+            .setTitle("Discard Document?")
+            .setMessage("If you leave now, your progress will be lost")
+            .setPositiveButton("Discard", DialogInterface.OnClickListener { dialogInterface, i ->
+                setResult(Activity.RESULT_CANCELED)
+                finish()
+
+                dialogInterface.dismiss()
+            })
+            .setNegativeButton("Keep editing", DialogInterface.OnClickListener { dialogInterface, i ->
+                dialogInterface.dismiss()
+            })
+        alertBuilder.create()
+        alertBuilder.show()
     }
 
     /**
@@ -596,37 +765,11 @@ class DocumentScannerActivity : AppCompatActivity() {
      */
     private fun cropDocumentAndFinishIntent() {
         val croppedImageResults = arrayListOf<String>()
-        for ((pageNumber, document) in documents.withIndex()) {
-            // crop document photo by using corners
-//            val croppedImage: Bitmap? = try {
-//                ImageUtil().crop(
-//                    document.originalPhotoFilePath,
-//                    document.corners
-//                )
-//            } catch (exception: Exception) {
-//                finishIntentWithError("unable to crop image: ${exception.message}")
-//                return
-//            }
-//
-//            if (croppedImage == null) {
-//                finishIntentWithError("Result of cropping is null")
-//                return
-//            }
-
+        for ((_, document) in documents.withIndex()) {
             // delete original document photo
             File(document.originalPhotoFilePath).delete()
 
-            // save cropped document photo
-//            try {
-//                val croppedImageFile = FileUtil().createImageFile(this, pageNumber)
-//                croppedImage.saveToFile(croppedImageFile, croppedImageQuality)
-//                croppedImageResults.add(Uri.fromFile(croppedImageFile).toString())
             document.croppedPhotoUri?.let { croppedImageResults.add(it) }
-//            } catch (exception: Exception) {
-//                finishIntentWithError(
-//                    "unable to save cropped image: ${exception.message}"
-//                )
-//            }
         }
 
         // return array of cropped document photo file paths
@@ -685,6 +828,10 @@ class DocumentScannerActivity : AppCompatActivity() {
     fun onPreviewCarouselScrolledToPosition(position: Int) {
         Log.e("SCROLLED", "PreviewCarousel to position: $position")
         focusedPosition = position
+
+        document = documents[focusedPosition]
+
+        "${position+1}/${documents.count()}".also { pagerTextView.text = it }
 
         (binding.thumbnailCarousel.layoutManager as CarouselLayoutManager).scrollToPosition(position)
     }
@@ -813,6 +960,6 @@ class DocumentScannerActivity : AppCompatActivity() {
     private fun addNewImage() {
         // Logic for adding a new image (e.g., opening gallery or camera picker)
         Log.e("FROM ANDROID", "8")
-        openDocumentProvider()
+        openDocumentProvider(DocumentScannerAction.ADD)
     }
 }

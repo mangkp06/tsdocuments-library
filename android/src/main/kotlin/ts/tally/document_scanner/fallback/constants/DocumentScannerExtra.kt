@@ -9,3 +9,14 @@ class DocumentScannerExtra {
         const val EXTRA_MAX_NUM_DOCUMENTS = "maxNumDocuments"
     }
 }
+
+class DocumentScannerAction {
+    companion object {
+        const val NONE = "NONE"
+        const val RETAKE = "RETAKE"
+        const val RESELECT = "RESELECT"
+        const val DELETE = "DELETE"
+        const val ADD = "ADD"
+        const val EDIT = "EDIT"
+    }
+}

@@ -13,10 +13,10 @@ import android.net.Uri
  * @constructor creates a document
  */
 class Document(
-    val originalPhotoFilePath: String,
+    var originalPhotoFilePath: String,
     var croppedPhotoUri: String?,
-    private val originalPhotoWidth: Int,
-    val originalPhotoHeight: Int,
+    var originalPhotoWidth: Int,
+    var originalPhotoHeight: Int,
     var corners: Quad
 ) {
 }
