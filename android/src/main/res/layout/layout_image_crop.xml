@@ -49,12 +49,12 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_auto_crop"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Auto Crop"
             android:textColor="@android:color/white"
             style="@style/Widget.Material3.Button.TextButton"
-            android:layout_toLeftOf="@+id/btn_no_crop"
+            android:layout_centerHorizontal="true"
             android:backgroundTint="@android:color/transparent"
             android:drawableTop="@drawable/ic_crop"
             android:drawableTint="@android:color/white"/>
@@ -66,7 +66,7 @@
             android:text="No Crop"
             android:textColor="@android:color/white"
             style="@style/Widget.Material3.Button.TextButton"
-            android:layout_centerHorizontal="true"
+            android:layout_toLeftOf="@+id/btn_auto_crop"
             android:backgroundTint="@android:color/transparent"
             android:drawableTop="@drawable/ic_no_crop"
             android:drawableTint="@android:color/white"/>
@@ -78,7 +78,7 @@
             android:text="Rotate"
             android:textColor="@android:color/white"
             style="@style/Widget.Material3.Button.TextButton"
-            android:layout_toRightOf="@+id/btn_no_crop"
+            android:layout_toRightOf="@+id/btn_auto_crop"
             android:backgroundTint="@android:color/transparent"
             android:drawableTop="@drawable/ic_rotate"
             android:drawableTint="@android:color/white"/>

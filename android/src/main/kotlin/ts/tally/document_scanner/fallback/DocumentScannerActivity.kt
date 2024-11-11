@@ -2,7 +2,6 @@ package ts.tally.document_scanner.fallback
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -12,14 +11,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.ViewGroup
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatButton
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
@@ -52,11 +49,9 @@ import ts.tally.document_scanner.fallback.models.Quad
 import ts.tally.document_scanner.fallback.ui.ImageCropView
 import ts.tally.document_scanner.fallback.utils.CameraUtil
 import ts.tally.document_scanner.fallback.utils.DocumentProviderUtil
-import ts.tally.document_scanner.fallback.utils.DocumentUtil
 import ts.tally.document_scanner.fallback.utils.FileUtil
 import ts.tally.document_scanner.fallback.utils.ImageUtil
 import java.io.File
-import java.io.FileOutputStream
 
 
 /**
@@ -313,13 +308,20 @@ class DocumentScannerActivity : AppCompatActivity() {
             // display cropper, and allow user to move corners
             imageView.setCropper(cornersInImagePreviewCoordinates)
 
-            previewLayout?.isVisible = false
-            cropLayout?.isVisible = true
+            showCroppingLayout(true)
         } catch (exception: Exception) {
             finishIntentWithError(
                 "unable get image preview ready: ${exception.message}"
             )
             return
+        }
+    }
+
+    val backCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            Log.e("FROM ANDROID", "HANDLE BACK")
+
+            showCroppingLayout(false)
         }
     }
 
@@ -343,8 +345,12 @@ class DocumentScannerActivity : AppCompatActivity() {
             previewLayout = findViewById(R.id.lyt_preview_layout)
             cropLayout = findViewById(R.id.lyt_crop_layout)
 
-            previewLayout?.isVisible = true
-            cropLayout?.isVisible = false
+            showCroppingLayout(false)
+
+            onBackPressedDispatcher.addCallback(
+                this,
+                backCallback
+            )
 
             // validate maxNumDocuments option, and update default if user sets it
             var userSpecifiedMaxImages: Int? = null
@@ -398,8 +404,7 @@ class DocumentScannerActivity : AppCompatActivity() {
             if (documents.count() == 0) {
                 onClickCancel()
             } else {
-                previewLayout?.isVisible = true
-                cropLayout?.isVisible = false
+                showCroppingLayout(false)
             }
         }
 
@@ -483,6 +488,13 @@ class DocumentScannerActivity : AppCompatActivity() {
                 "error opening camera: ${exception.message}"
             )
         }
+    }
+
+    private fun showCroppingLayout(show: Boolean) {
+        backCallback.isEnabled = show && documents.isNotEmpty()
+
+        previewLayout?.isVisible = !show
+        cropLayout?.isVisible = show
     }
 
     private fun onRotateClockwise() {
@@ -671,8 +683,7 @@ class DocumentScannerActivity : AppCompatActivity() {
 
         (binding.previewCarousel.layoutManager as CarouselLayoutManager).scrollToPosition(selectedPosition)
 
-        previewLayout?.isVisible = true
-        cropLayout?.isVisible = false
+        showCroppingLayout(false)
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -704,8 +715,7 @@ class DocumentScannerActivity : AppCompatActivity() {
         binding.previewCarousel.adapter?.notifyItemChanged(selectedPosition)
         binding.thumbnailCarousel.adapter?.notifyItemChanged(selectedPosition)
 
-        previewLayout?.isVisible = true
-        cropLayout?.isVisible = false
+        showCroppingLayout(false)
     }
 
     /**
