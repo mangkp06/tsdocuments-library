@@ -7,6 +7,7 @@ class DocumentScannerExtra {
     companion object {
         const val EXTRA_CROPPED_IMAGE_QUALITY = "croppedImageQuality"
         const val EXTRA_MAX_NUM_DOCUMENTS = "maxNumDocuments"
+        const val EXTRA_IMPORT_FILEPATH = "importFilePath"
     }
 }
 

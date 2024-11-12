@@ -69,6 +69,11 @@ class DocumentScannerActivity : AppCompatActivity() {
     private var maxNumDocuments = DefaultSetting.MAX_NUM_DOCUMENTS
 
     /**
+     * @property importedFilePath path of the file to serve as starting file for document selector
+     */
+    private var importedFilePath : String? = null
+
+    /**
      * @property croppedImageQuality the 0 - 100 quality of the cropped image
      */
     private var croppedImageQuality = DefaultSetting.CROPPED_IMAGE_QUALITY
@@ -197,70 +202,7 @@ class DocumentScannerActivity : AppCompatActivity() {
     private val documentUtil = DocumentProviderUtil(
         this,
         onDocumentSelectSuccess = {
-            filePath ->
-                // if maxNumDocuments is 3 and this is the 3rd photo, hide the new photo button since
-                // we reach the allowed limit
-//                if (documents.size == maxNumDocuments - 1) {
-//                    val newPhotoButton: ImageButton = findViewById(R.id.new_photo_button)
-//                    newPhotoButton.isClickable = false
-//                    newPhotoButton.visibility = View.INVISIBLE
-//                }
-//                previewLayout?.isVisiF false
-
-                Log.e("FROM ANDROID", "5 " + filePath)
-                if (FileUtil().getMimeType(filePath) == "application/pdf") {
-                    Log.e("FROM ANDROID", "5.1 MimeType PDF");
-                    val results = arrayListOf<String>()
-                    filePath?.let { results.add(it) }
-                    setResult(
-                        Activity.RESULT_OK,
-                        Intent().putExtra("croppedImageResults", results)
-                    )
-                    finish()
-                    return@DocumentProviderUtil
-                }
-                Log.e("FROM ANDROID", "5.2 SHOULD HAVE RETURNED");
-                // get bitmap from photo file path
-                val photo: Bitmap? = try {
-                    ImageUtil().getImageFromFilePath(filePath!!)
-                } catch (exception: Exception) {
-                    finishIntentWithError("Unable to get bitmap: ${exception.localizedMessage}")
-                    return@DocumentProviderUtil
-                }
-
-                if (photo == null) {
-                    finishIntentWithError("Document bitmap is null.")
-                    return@DocumentProviderUtil
-                }
-                Log.e("FROM ANDROID", "6")
-                // get document corners by detecting them, or falling back to photo corners with
-                // slight margin if we can't find the corners
-                val corners = try {
-                    val (topLeft, topRight, bottomLeft, bottomRight) = getDocumentCorners(photo)
-                    Quad(topLeft, topRight, bottomRight, bottomLeft)
-                } catch (exception: Exception) {
-                    finishIntentWithError(
-                        "unable to get document corners: ${exception.message}"
-                    )
-                    return@DocumentProviderUtil
-                }
-
-                if (documentAction == DocumentScannerAction.ADD) {
-                    document = Document(filePath, null, photo.width, photo.height, corners)
-                    loadCropLayoutForImageAtPosition(position = documents.size)
-                } else if (documentAction == DocumentScannerAction.RETAKE) {
-                    Log.e("FROM ANDROID", "6.1 $focusedPosition")
-                    document = documents[focusedPosition]
-                    Log.e("FROM ANDROID", "6.2")
-                    document?.let {
-                        it.originalPhotoFilePath = filePath
-                        it.originalPhotoWidth = photo.width
-                        it.originalPhotoHeight = photo.height
-                        it.corners = corners
-                    }
-
-                    loadCropLayoutForImageAtPosition(position = focusedPosition)
-                }
+            filePath -> openDocumentAfterSelection(filePath)
         },
         onCancelDocumentSelect = {
             if (documents.isEmpty()) {
@@ -269,6 +211,59 @@ class DocumentScannerActivity : AppCompatActivity() {
             }
         }
     )
+
+    private fun openDocumentAfterSelection(filePath: String?) {
+        if (FileUtil().getMimeType(filePath) == "application/pdf") {
+            val results = arrayListOf<String>()
+            filePath?.let { results.add(it) }
+            setResult(
+                Activity.RESULT_OK,
+                Intent().putExtra("croppedImageResults", results)
+            )
+            finish()
+            return
+        }
+
+        // get bitmap from photo file path
+        val photo: Bitmap? = try {
+            ImageUtil().getImageFromFilePath(filePath!!)
+        } catch (exception: Exception) {
+            finishIntentWithError("Unable to get bitmap: ${exception.localizedMessage}")
+            return
+        }
+
+        if (photo == null) {
+            finishIntentWithError("Document bitmap is null.")
+            return
+        }
+
+        // get document corners by detecting them, or falling back to photo corners with
+        // slight margin if we can't find the corners
+        val corners = try {
+            val (topLeft, topRight, bottomLeft, bottomRight) = getDocumentCorners(photo)
+            Quad(topLeft, topRight, bottomRight, bottomLeft)
+        } catch (exception: Exception) {
+            finishIntentWithError(
+                "unable to get document corners: ${exception.message}"
+            )
+            return
+        }
+
+        if (documentAction == DocumentScannerAction.ADD) {
+            document = Document(filePath, null, photo.width, photo.height, corners)
+            loadCropLayoutForImageAtPosition(position = documents.size)
+        } else if (documentAction == DocumentScannerAction.RETAKE) {
+            document = documents[focusedPosition]
+            document?.let {
+                it.originalPhotoFilePath = filePath
+                it.originalPhotoWidth = photo.width
+                it.originalPhotoHeight = photo.height
+                it.corners = corners
+            }
+
+            loadCropLayoutForImageAtPosition(position = focusedPosition)
+        }
+    }
 
     var previewLayout : ConstraintLayout? = null
     var cropLayout : ConstraintLayout? = null
@@ -362,6 +357,14 @@ class DocumentScannerActivity : AppCompatActivity() {
                 }
                 userSpecifiedMaxImages = it as Int
                 maxNumDocuments = userSpecifiedMaxImages as Int
+            }
+
+            var userImportedFilePath: String? = null
+            intent.extras?.get(DocumentScannerExtra.EXTRA_IMPORT_FILEPATH)?.let {
+                if (it.toString() != null) {
+                    userImportedFilePath = it as String
+                    importedFilePath = userImportedFilePath as String
+                }
             }
 
             // validate croppedImageQuality option, and update value if user sets it
@@ -481,7 +484,11 @@ class DocumentScannerActivity : AppCompatActivity() {
         setUpThumbnailCarousel()
 
         try {
-            openDocumentProvider(DocumentScannerAction.ADD)
+            if (importedFilePath != null) {
+                openDocumentAfterSelection(importedFilePath)
+            } else {
+                openDocumentProvider(DocumentScannerAction.ADD)
+            }
             
         } catch (exception: Exception) {
             finishIntentWithError(

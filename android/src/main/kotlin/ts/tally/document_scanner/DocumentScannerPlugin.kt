@@ -53,8 +53,9 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             startScan(noOfPages, isGalleryImportAllowed)
         } else if (call.method == "selectDocuments") {
             val noOfPages = call.argument<Int>("noOfPages") ?: 50;
+            val filePath = call.argument<String>("filePath") ?: null;
             this.pendingResult = result
-            startDocumentProvider(noOfPages)
+            startDocumentProvider(noOfPages, filePath)
         } else {
             result.notImplemented()
         }
@@ -160,12 +161,17 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     /**
      * create intent to launch document scanner and set custom options
      */
-    private fun createDocumentScanIntent(noOfPages: Int): Intent {
+    private fun createDocumentScanIntent(noOfPages: Int, filePath: String?): Intent {
         val documentScanIntent = Intent(activity, DocumentScannerActivity::class.java)
 
         documentScanIntent.putExtra(
             DocumentScannerExtra.EXTRA_MAX_NUM_DOCUMENTS,
             noOfPages
+        )
+
+        documentScanIntent.putExtra(
+            DocumentScannerExtra.EXTRA_IMPORT_FILEPATH,
+            filePath
         )
 
         return documentScanIntent
@@ -210,8 +216,8 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun startDocumentProvider(noOfPages: Int) {
-        val intent = createDocumentScanIntent(noOfPages)
+    private fun startDocumentProvider(noOfPages: Int, filePath: String?) {
+        val intent = createDocumentScanIntent(noOfPages, filePath)
         try {
             ActivityCompat.startActivityForResult(
                 this.activity,
