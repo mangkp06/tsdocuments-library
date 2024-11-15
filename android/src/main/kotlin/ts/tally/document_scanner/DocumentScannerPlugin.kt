@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.IntentSender
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import ts.tally.document_scanner.fallback.DocumentScannerActivity
 import ts.tally.document_scanner.fallback.constants.DocumentScannerExtra
@@ -53,9 +54,16 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             startScan(noOfPages, isGalleryImportAllowed)
         } else if (call.method == "selectDocuments") {
             val noOfPages = call.argument<Int>("noOfPages") ?: 50;
-            val filePath = call.argument<String>("filePath") ?: null;
+            var sharedFiles : List<String>? = null;
+            Log.e("FROM ANDROID", "Shared Files " + call.hasArgument("sharedFiles"));
+            if (call.hasArgument("sharedFiles")) {
+                Log.e("FROM ANDROID", "Has SharedFiles")
+                sharedFiles = call.argument<List<String>>("sharedFiles");
+            }
+            val sharedFilesArray = sharedFiles?.toTypedArray();
+
             this.pendingResult = result
-            startDocumentProvider(noOfPages, filePath)
+            startDocumentProvider(noOfPages, sharedFilesArray);
         } else {
             result.notImplemented()
         }
@@ -161,7 +169,7 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     /**
      * create intent to launch document scanner and set custom options
      */
-    private fun createDocumentScanIntent(noOfPages: Int, filePath: String?): Intent {
+    private fun createDocumentScanIntent(noOfPages: Int, sharedFiles: Array<String> ?= null): Intent {
         val documentScanIntent = Intent(activity, DocumentScannerActivity::class.java)
 
         documentScanIntent.putExtra(
@@ -170,8 +178,8 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
 
         documentScanIntent.putExtra(
-            DocumentScannerExtra.EXTRA_IMPORT_FILEPATH,
-            filePath
+            DocumentScannerExtra.EXTRA_SHARED_FILES,
+            sharedFiles
         )
 
         return documentScanIntent
@@ -216,8 +224,8 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun startDocumentProvider(noOfPages: Int, filePath: String?) {
-        val intent = createDocumentScanIntent(noOfPages, filePath)
+    private fun startDocumentProvider(noOfPages: Int, sharedFiles: Array<String> ?= null) {
+        val intent = createDocumentScanIntent(noOfPages, sharedFiles)
         try {
             ActivityCompat.startActivityForResult(
                 this.activity,

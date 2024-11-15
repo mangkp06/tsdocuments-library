@@ -28,7 +28,7 @@ class DocumentScanner {
   }
 
   static Future<List<String>?> selectDocuments(
-      {int noOfPages = 100}) async {
+      {int noOfPages = 100, List<String>? sharedFiles}) async {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.mediaLibrary,
     ].request();
@@ -38,7 +38,8 @@ class DocumentScanner {
     }
 
     final List<dynamic>? pictures = await _channel.invokeMethod('selectDocuments', {
-      'noOfPages': noOfPages
+      'noOfPages': noOfPages,
+      'sharedFiles': sharedFiles
     });
     return pictures?.map((e) => e as String).toList();
   }

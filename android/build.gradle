@@ -53,7 +53,7 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "androidx.appcompat:appcompat:1.6.1"
     implementation 'com.google.mlkit:vision-common:16.7.0'
     implementation 'com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1'
 

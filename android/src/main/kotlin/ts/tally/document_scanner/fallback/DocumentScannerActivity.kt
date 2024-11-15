@@ -213,6 +213,7 @@ class DocumentScannerActivity : AppCompatActivity() {
     )
 
     private fun openDocumentAfterSelection(filePath: String?) {
+        Log.e("FROM ANDROID", "openDocumentAfterSelection " + filePath);
         if (FileUtil().getMimeType(filePath) == "application/pdf") {
             val results = arrayListOf<String>()
             filePath?.let { results.add(it) }
@@ -249,20 +250,10 @@ class DocumentScannerActivity : AppCompatActivity() {
             return
         }
 
-        if (documentAction == DocumentScannerAction.ADD) {
-            document = Document(filePath, null, photo.width, photo.height, corners)
-            loadCropLayoutForImageAtPosition(position = documents.size)
-        } else if (documentAction == DocumentScannerAction.RETAKE) {
-            document = documents[focusedPosition]
-            document?.let {
-                it.originalPhotoFilePath = filePath
-                it.originalPhotoWidth = photo.width
-                it.originalPhotoHeight = photo.height
-                it.corners = corners
-            }
-
-            loadCropLayoutForImageAtPosition(position = focusedPosition)
-        }
+        Log.e("FROM ANDROID", "Document Selected");
+        document = Document(filePath, null, photo.width, photo.height, corners)
+        Log.e("FROM ANDROID", "Document Added: " + document);
+        loadCropLayoutForImageAtPosition(position = documents.size)
     }
 
     var previewLayout : ConstraintLayout? = null
@@ -359,12 +350,10 @@ class DocumentScannerActivity : AppCompatActivity() {
                 maxNumDocuments = userSpecifiedMaxImages as Int
             }
 
-            var userImportedFilePath: String? = null
-            intent.extras?.get(DocumentScannerExtra.EXTRA_IMPORT_FILEPATH)?.let {
-                if (it.toString() != null) {
-                    userImportedFilePath = it as String
-                    importedFilePath = userImportedFilePath as String
-                }
+            var userImportedFilePaths: Array<String>?
+            intent.extras?.getStringArray(DocumentScannerExtra.EXTRA_SHARED_FILES)?.let {
+                userImportedFilePaths = it as Array<String>
+                importedFilePath = userImportedFilePaths?.firstOrNull()
             }
 
             // validate croppedImageQuality option, and update value if user sets it
@@ -484,11 +473,7 @@ class DocumentScannerActivity : AppCompatActivity() {
         setUpThumbnailCarousel()
 
         try {
-            if (importedFilePath != null) {
-                openDocumentAfterSelection(importedFilePath)
-            } else {
-                openDocumentProvider(DocumentScannerAction.ADD)
-            }
+            openDocumentProvider(DocumentScannerAction.ADD)
             
         } catch (exception: Exception) {
             finishIntentWithError(
@@ -626,7 +611,11 @@ class DocumentScannerActivity : AppCompatActivity() {
     private fun openDocumentProvider(actionType: String) {
         document = null
         documentAction = actionType
-        documentUtil.openDocumentProvider(documents.size)
+        if (importedFilePath != null) {
+            openDocumentAfterSelection(importedFilePath)
+        } else {
+            documentUtil.openDocumentProvider(documents.size)
+        }
     }
 
     /**
@@ -637,6 +626,7 @@ class DocumentScannerActivity : AppCompatActivity() {
     private fun addSelectedCornersAndOriginalPhotoPathToDocuments() {
         // only add document it's not null (the current document photo capture, and corner
         // detection are successful)
+        Log.e("FROM ANDROID", "Document: " + document);
         document?.let { document ->
             // convert corners from image preview coordinates to original photo coordinates
             // (original image is probably bigger than the preview image)
@@ -682,6 +672,7 @@ class DocumentScannerActivity : AppCompatActivity() {
                 documents.add(it)
             }
             Log.e("FROM ANDROID", "8.4 ${documents.count()}")
+            importedFilePath = null;
         }
         Log.e("FROM ANDROID", "8.5 ${documents.count()} $selectedPosition")
 
@@ -939,7 +930,7 @@ class DocumentScannerActivity : AppCompatActivity() {
 //                    binding.imageView.setImageResource(R.drawable.ic_add)
                     binding.imageView.setOnClickListener(null)
                     if (binding.imageView.isFocused) {
-                        binding.imageView.setStrokeColorResource(R.color.white)
+                        binding.imageView.setStrokeColorResource(R.color.gray)
                         binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
                     } else {
                         binding.imageView.setStrokeWidthResource(R.dimen.zero)
@@ -955,15 +946,13 @@ class DocumentScannerActivity : AppCompatActivity() {
                             .load(document.originalPhotoFilePath)
                             .into(binding.imageView)
                     }
-
-
-                    Log.e("RENDER", "OnClickListener --> ${binding.imageView.hasOnClickListeners()}")
                 } else {
-                    Log.e("FROM ANDROID", "4.2")
+                    Log.e("FROM ANDROID", "" + maxNumDocuments + " --> " + images.count());
+                    binding.imageView.isVisible = maxNumDocuments > images.count()
+
                     binding.imageView.setImageResource(R.drawable.ic_add)
                     binding.imageView.setStrokeColorResource(R.color.lightGray)
                     binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
-                    Log.e("FROM ANDROID", "4.3")
                     binding.imageView.setOnClickListener {
                         // Handle adding new image action
                         addNewImage()
