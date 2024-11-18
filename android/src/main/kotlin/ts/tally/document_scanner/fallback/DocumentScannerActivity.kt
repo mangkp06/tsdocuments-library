@@ -18,6 +18,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
@@ -699,9 +700,13 @@ class DocumentScannerActivity : AppCompatActivity() {
         if (position >= 0) {
             "${position+1}/${documents.count()}".also { pagerTextView.text = it }
 
-            binding.previewCarousel.adapter?.notifyItemChanged(position)
-            binding.thumbnailCarousel.adapter?.notifyItemChanged(position)
+            binding.previewCarousel.adapter?.notifyDataSetChanged()
+            binding.thumbnailCarousel.adapter?.notifyDataSetChanged()
         } else {
+            focusedPosition = when {
+                focusedPosition == documents.count() -> focusedPosition - 1
+                else -> focusedPosition
+            }
             "${focusedPosition+1}/${documents.count()}".also { pagerTextView.text = it }
 
             binding.previewCarousel.adapter?.notifyDataSetChanged()
@@ -945,15 +950,15 @@ class DocumentScannerActivity : AppCompatActivity() {
                     Log.d("FROM ANDROID", "BIND to "+position + " " + focusedPosition)
                     if (position == focusedPosition) {
                         Log.d("FROM ANDROID", "IF $position ------")
-                        binding.thumbnailCard.setStrokeColor(R.color.white)
-                        binding.thumbnailCard.strokeColor = R.color.white;
-                        binding.thumbnailCard.scaleX = 1.1f
-                        binding.thumbnailCard.scaleY = 1.1f
-                    } else {
-                        Log.d("FROM ANDROID", "ELSE $position ------")
-                        binding.thumbnailCard.setStrokeColor(R.color.colorPrimary)
+                        binding.thumbnailCard.strokeWidth = 4
+                        binding.thumbnailCard.strokeColor = ContextCompat.getColor(context, R.color.white)
                         binding.thumbnailCard.scaleX = 1.0f
                         binding.thumbnailCard.scaleY = 1.0f
+                    } else {
+                        Log.d("FROM ANDROID", "ELSE $position ------")
+                        binding.thumbnailCard.strokeWidth = 0
+                        binding.thumbnailCard.scaleX = 0.85f
+                        binding.thumbnailCard.scaleY = 0.85f
                     }
                     // Load thumbnail images using Glide
                     val document : Document = images[position]
@@ -975,6 +980,10 @@ class DocumentScannerActivity : AppCompatActivity() {
                     binding.imageView.isVisible = maxNumDocuments > images.count()
 
                     binding.imageView.setImageResource(R.drawable.ic_add)
+                    binding.thumbnailCard.strokeWidth = 2
+                    binding.thumbnailCard.strokeColor = ContextCompat.getColor(context, R.color.lightGray)
+                    binding.thumbnailCard.scaleX = 0.85f
+                    binding.thumbnailCard.scaleY = 0.85f
 //                    binding.imageView.setStrokeColorResource(R.color.lightGray)
 //                    binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
                     binding.imageView.setOnClickListener {

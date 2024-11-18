@@ -11,7 +11,7 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="0dp"
     app:strokeWidth="1dp"
-    app:strokeColor="@color/white"
+    app:strokeColor="@color/lightGray"
     >
     <!-- Thumbnail Items Programmatically added -->
 
