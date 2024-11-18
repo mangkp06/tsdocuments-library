@@ -1,19 +1,18 @@
-<com.google.android.material.carousel.MaskableFrameLayout
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/thumbnailCard"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:textAlignment="center"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/thumbnail_carousel_layout"
-    android:layout_width="48dp"
-    android:layout_height="72dp"
-    android:maxWidth="48dp"
-    android:maxHeight="72dp"
-    android:layout_marginTop="24dp"
-    android:layout_marginHorizontal="2dp"
-    android:foreground="?attr/selectableItemBackground"
-    app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
-    android:layout_gravity="center_horizontal"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="16dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="0dp"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/white"
     >
-
     <!-- Thumbnail Items Programmatically added -->
 
     <com.google.android.material.imageview.ShapeableImageView
@@ -23,8 +22,6 @@
         android:maxWidth="48dp"
         android:maxHeight="72dp"
         android:layout_gravity="center_horizontal"
-        app:contentPadding="12dp"
-        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
         android:scaleType="center"
         />
-</com.google.android.material.carousel.MaskableFrameLayout>
+</com.google.android.material.card.MaterialCardView>

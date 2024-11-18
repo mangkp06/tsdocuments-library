@@ -21,6 +21,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.get
 import androidx.core.view.isVisible
+import androidx.core.view.setPadding
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.MaterialToolbar
@@ -48,7 +50,9 @@ import ts.tally.document_scanner.fallback.models.Point
 import ts.tally.document_scanner.fallback.models.Quad
 import ts.tally.document_scanner.fallback.ui.ImageCropView
 import ts.tally.document_scanner.fallback.utils.CameraUtil
+import ts.tally.document_scanner.fallback.utils.DocumentProviderType
 import ts.tally.document_scanner.fallback.utils.DocumentProviderUtil
+import ts.tally.document_scanner.fallback.utils.DocumentUtil
 import ts.tally.document_scanner.fallback.utils.FileUtil
 import ts.tally.document_scanner.fallback.utils.ImageUtil
 import java.io.File
@@ -614,7 +618,12 @@ class DocumentScannerActivity : AppCompatActivity() {
         if (importedFilePath != null) {
             openDocumentAfterSelection(importedFilePath)
         } else {
-            documentUtil.openDocumentProvider(documents.size)
+            val documentProviderType = when {
+                documents.size == 0 -> DocumentProviderType.ALL
+                documentUtil.isPDF(documents.first().originalPhotoFilePath) -> DocumentProviderType.DOCUMENT
+                else -> DocumentProviderType.IMAGE
+            }
+            documentUtil.openDocumentProvider(documents.size, documentProviderType)
         }
     }
 
@@ -833,6 +842,10 @@ class DocumentScannerActivity : AppCompatActivity() {
         })
     }
 
+    fun scrollPreviewCarouselToPosition(position: Int) {
+        binding.previewCarousel.smoothScrollToPosition(position)
+    }
+
     fun onPreviewCarouselScrolledToPosition(position: Int) {
         Log.e("SCROLLED", "PreviewCarousel to position: $position")
         focusedPosition = position
@@ -841,19 +854,19 @@ class DocumentScannerActivity : AppCompatActivity() {
 
         "${position+1}/${documents.count()}".also { pagerTextView.text = it }
 
-        (binding.thumbnailCarousel.layoutManager as CarouselLayoutManager).scrollToPosition(position)
+        (binding.thumbnailCarousel.adapter as ThumbnailCarouselAdapter).notifyDataSetChanged()
     }
 
     // Set up the thumbnail carousel (Thumbnails with "+" button)
     private fun setUpThumbnailCarousel() {
-        val carouselLayoutManager = CarouselLayoutManager()
-        carouselLayoutManager.carouselAlignment = CarouselLayoutManager.ALIGNMENT_CENTER
+        val carouselLayoutManager = LinearLayoutManager(this@DocumentScannerActivity, RecyclerView.HORIZONTAL, false);
+//        carouselLayoutManager.carouselAlignment = CarouselLayoutManager.ALIGNMENT_CENTER
         binding.thumbnailCarousel.layoutManager = carouselLayoutManager
         binding.thumbnailCarousel.adapter = ThumbnailCarouselAdapter(this, documents)
 
         // Attach a SnapHelper to center items
-        val snapHelper = CarouselSnapHelper()
-        snapHelper.attachToRecyclerView(binding.thumbnailCarousel)
+//        val snapHelper = CarouselSnapHelper()
+//        snapHelper.attachToRecyclerView(binding.thumbnailCarousel)
 
         binding.thumbnailCarousel.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
@@ -861,15 +874,15 @@ class DocumentScannerActivity : AppCompatActivity() {
                 super.onScrollStateChanged(recyclerView, newState)
 
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    val layoutManager = recyclerView.layoutManager as CarouselLayoutManager
-                    val snapView = snapHelper.findSnapView(layoutManager)
-
-                    if (snapView != null) {
-                        val position = layoutManager.getPosition(snapView)
-                        Log.e("SCROLLED", "Thumbnail onScrollStateChanged - position: $position")
-                        onThumbnailCarouselScrolledToPosition(position)
-                    }
+                    Log.d("FROM ANDROID", "SCROLLED TO position")
+                    (recyclerView.adapter as ThumbnailCarouselAdapter).notifyDataSetChanged()
+//                    val snapView = snapHelper.findSnapView(layoutManager)
+//
+//                    if (snapView != null) {
+//                        val position = layoutManager.getPosition(snapView)
+//                        Log.e("SCROLLED", "Thumbnail onScrollStateChanged - position: $position")
+//                        onThumbnailCarouselScrolledToPosition(position)
+//                    }
                 }
             }
         })
@@ -929,11 +942,18 @@ class DocumentScannerActivity : AppCompatActivity() {
                 if (position < images.size) {
 //                    binding.imageView.setImageResource(R.drawable.ic_add)
                     binding.imageView.setOnClickListener(null)
-                    if (binding.imageView.isFocused) {
-                        binding.imageView.setStrokeColorResource(R.color.gray)
-                        binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
+                    Log.d("FROM ANDROID", "BIND to "+position + " " + focusedPosition)
+                    if (position == focusedPosition) {
+                        Log.d("FROM ANDROID", "IF $position ------")
+                        binding.thumbnailCard.setStrokeColor(R.color.white)
+                        binding.thumbnailCard.strokeColor = R.color.white;
+                        binding.thumbnailCard.scaleX = 1.1f
+                        binding.thumbnailCard.scaleY = 1.1f
                     } else {
-                        binding.imageView.setStrokeWidthResource(R.dimen.zero)
+                        Log.d("FROM ANDROID", "ELSE $position ------")
+                        binding.thumbnailCard.setStrokeColor(R.color.colorPrimary)
+                        binding.thumbnailCard.scaleX = 1.0f
+                        binding.thumbnailCard.scaleY = 1.0f
                     }
                     // Load thumbnail images using Glide
                     val document : Document = images[position]
@@ -946,13 +966,17 @@ class DocumentScannerActivity : AppCompatActivity() {
                             .load(document.originalPhotoFilePath)
                             .into(binding.imageView)
                     }
+                    binding.imageView.setOnClickListener {
+                        // Handle adding new image action
+                        scrollPreviewCarouselToPosition(position)
+                    }
                 } else {
                     Log.e("FROM ANDROID", "" + maxNumDocuments + " --> " + images.count());
                     binding.imageView.isVisible = maxNumDocuments > images.count()
 
                     binding.imageView.setImageResource(R.drawable.ic_add)
-                    binding.imageView.setStrokeColorResource(R.color.lightGray)
-                    binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
+//                    binding.imageView.setStrokeColorResource(R.color.lightGray)
+//                    binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
                     binding.imageView.setOnClickListener {
                         // Handle adding new image action
                         addNewImage()

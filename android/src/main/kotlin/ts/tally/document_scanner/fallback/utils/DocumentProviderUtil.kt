@@ -25,6 +25,15 @@ import java.io.IOException
  * @param onCancelPhoto gets called when user cancels out of camera
  * @constructor creates camera util
  */
+
+class DocumentProviderType {
+    companion object {
+        const val ALL = "ALL"
+        const val IMAGE = "IMAGE"
+        const val DOCUMENT = "DOCUMENT"
+    }
+}
+
 class DocumentProviderUtil(
     private val activity: ComponentActivity,
     private val onDocumentSelectSuccess: (filePath: String?) -> Unit,
@@ -113,16 +122,30 @@ class DocumentProviderUtil(
      * @param pageNumber the current document page number
      */
     @Throws(IOException::class)
-    fun openDocumentProvider(pageNumber: Int) {
+    fun openDocumentProvider(pageNumber: Int, providerType: String) {
+
+        val documentTypes = when (providerType) {
+            DocumentProviderType.ALL -> arrayOf("image/*", "application/pdf")
+            DocumentProviderType.IMAGE -> arrayOf("image/*")
+            DocumentProviderType.DOCUMENT -> arrayOf("application/pdf")
+            else -> arrayOf("image/*", "application/pdf")
+        }
+
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             // Set the type to allow only images and PDFs
             type = "*/*"
+
             // Specify the MIME types for image and PDF
-            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/*", "application/pdf"))
+            putExtra(Intent.EXTRA_MIME_TYPES, documentTypes)
             // Allow the user to select content that can be opened
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         // open document provider
         startForResult.launch(intent)
+    }
+
+    fun isPDF(path: String) : Boolean {
+        val file = File(path)
+        return file.extension == "pdf"
     }
 }

@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.DocumentsContract
 import android.provider.MediaStore
 import android.util.Log
+import java.io.File
 
 class DocumentUtil {
     fun getPathFromUri(context: Context, uri: Uri): String? {

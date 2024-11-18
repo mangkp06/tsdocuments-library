@@ -35,7 +35,7 @@ class FileUtil {
         // create file in pictures directory
         val storageDir: File? = activity.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
-            "DOCUMENT_SCAN_${pageNumber}_${dateTime}",
+            "IMG_${dateTime}",
             ".jpg",
             storageDir
         )

@@ -1,0 +1,30 @@
+<com.google.android.material.carousel.MaskableFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/thumbnail_carousel_layout"
+    android:layout_width="48dp"
+    android:layout_height="72dp"
+    android:maxWidth="48dp"
+    android:maxHeight="72dp"
+    android:layout_marginTop="24dp"
+    android:layout_marginHorizontal="2dp"
+    android:foreground="?attr/selectableItemBackground"
+    app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+    android:layout_gravity="center_horizontal"
+    >
+
+    <!-- Thumbnail Items Programmatically added -->
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imageView"
+        android:layout_width="48dp"
+        android:layout_height="72dp"
+        android:maxWidth="48dp"
+        android:maxHeight="72dp"
+        android:layout_gravity="center_horizontal"
+        app:contentPadding="12dp"
+        app:shapeAppearance="?attr/shapeAppearanceCornerMedium"
+        android:scaleType="center"
+        />
+</com.google.android.material.carousel.MaskableFrameLayout>
