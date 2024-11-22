@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.text.htmlEncode
 import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
@@ -258,7 +259,10 @@ class DocumentScannerActivity : AppCompatActivity() {
         Log.e("FROM ANDROID", "Document Selected");
         document = Document(filePath, null, photo.width, photo.height, corners)
         Log.e("FROM ANDROID", "Document Added: " + document);
-        loadCropLayoutForImageAtPosition(position = documents.size)
+        loadCropLayoutForImageAtPosition(position = when(documentAction) {
+            DocumentScannerAction.RESELECT -> focusedPosition
+            else -> documents.size
+        })
     }
 
     var previewLayout : ConstraintLayout? = null
@@ -683,6 +687,15 @@ class DocumentScannerActivity : AppCompatActivity() {
             }
             Log.e("FROM ANDROID", "8.4 ${documents.count()}")
             importedFilePath = null;
+        } else if (documentAction == DocumentScannerAction.RESELECT) {
+            val documentToDelete = documents[selectedPosition]
+            File(documentToDelete.originalPhotoFilePath).delete()
+            documentToDelete.croppedPhotoUri?.let { File(it).delete() }
+            documents.removeAt(selectedPosition)
+            document?.let {
+                Log.e("FROM ANDROID", "8.3")
+                documents.add(selectedPosition, it)
+            }
         }
         Log.e("FROM ANDROID", "8.5 ${documents.count()} $selectedPosition")
 
@@ -754,9 +767,7 @@ class DocumentScannerActivity : AppCompatActivity() {
      * case the original document photo isn't good, and they need to take it again.
      */
     private fun onClickRetake(position: Int) {
-        // we're going to retake the photo, so delete the one we just took
-
-        openDocumentProvider(DocumentScannerAction.RETAKE)
+        openDocumentProvider(DocumentScannerAction.RESELECT)
     }
 
     /**

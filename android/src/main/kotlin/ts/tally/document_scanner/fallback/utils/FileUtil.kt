@@ -5,8 +5,10 @@ import android.os.Environment
 import android.util.Log
 import android.webkit.MimeTypeMap
 import androidx.activity.ComponentActivity
+import androidx.core.text.htmlEncode
 import java.io.File
 import java.io.IOException
+import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -41,17 +43,35 @@ class FileUtil {
         )
     }
 
-    fun getMimeType(url: String?): String? {
+    // ORIGINAL TO BE FIXED
+//    fun getMimeType(url: String?): String? {
+//        var type: String? = null
+//        val extension = url.let {
+//            val encodedPath = URLEncoder.encode(it, "UTF-8")
+//            val fileUri = Uri.parse("file://$encodedPath")
+//            MimeTypeMap.getFileExtensionFromUrl(fileUri.toString())
+//        }
+//
+//        Log.e("FROM ANDROID extension", extension);
+//        if (extension != null) {
+//            val sanitizedExtension = extension.replace("[^a-zA-Z0-9]".toRegex(), "")
+//            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(sanitizedExtension)
+//        }
+//        Log.e("FROM ANDROID type", type!!);
+//
+//        return type
+//    }
+
+    fun getMimeType(url: String?): String {
         var type: String? = null
         val extension = url.let {
-             MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(File(it)).toString())
+            val encodedPath = URLEncoder.encode(it, "UTF-8")
+            val fileUri = Uri.parse("file://$encodedPath")
+            File(fileUri.toString()).extension
         }
-
-        Log.e("FROM ANDROID", extension);
-        if (extension != null) {
-            type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
-        }
-        Log.e("FROM ANDROID", type!!);
+        Log.e("FROM ANDROID extension", extension);
+        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension)
+        Log.e("FROM ANDROID type", type!!);
 
         return type
     }
