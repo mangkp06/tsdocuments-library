@@ -4,7 +4,7 @@ import Vision
 import VisionKit
 
 @available(iOS 13.0, *)
-public class SwiftDocumentScannerPlugin: NSObject, FlutterPlugin, VNDocumentCameraViewControllerDelegate {
+public class SwiftDocumentScannerPlugin: NSObject, FlutterPlugin, VNDocumentCameraViewControllerDelegate, PHPickerViewControllerDelegate {
    var resultChannel: FlutterResult?
    var presentingController: VNDocumentCameraViewController?
 
@@ -15,7 +15,7 @@ public class SwiftDocumentScannerPlugin: NSObject, FlutterPlugin, VNDocumentCame
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    if call.method == "getPictures" {
+        if call.method == "getPictures" {
             let presentedVC: UIViewController? = UIApplication.shared.keyWindow?.rootViewController
             self.resultChannel = result
             if VNDocumentCameraViewController.isSupported {
@@ -25,11 +25,38 @@ public class SwiftDocumentScannerPlugin: NSObject, FlutterPlugin, VNDocumentCame
             } else {
                 result(FlutterError(code: "UNAVAILABLE", message: "Document camera is not available on this device", details: nil))
             }
+        } if call.method == "selectDocument" {
+            var configuration = PHPickerConfiguration()
+            configuration.selectionLimit = 1
+            configuration.filter = .images // Allow only images
+            
+            self.presentingController = PHPickerViewController(configuration: configuration)
+            self.presentingController!.delegate = self
+            presentedVC?.present(picker, animated: true, completion: nil)
         } else {
             result(FlutterMethodNotImplemented)
             return
         }
-  }
+    }
+
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        picker.dismiss(animated: true)
+        
+        guard let result = results.first else { return }
+        let itemProvider = result.itemProvider
+        
+        if itemProvider.canLoadObject(ofClass: UIImage.self) {
+            itemProvider.loadObject(ofClass: UIImage.self) { [weak self] (image, error) in
+                DispatchQueue.main.async {
+                    if let image = image as? UIImage {
+                        self?.imageView.image = image
+                    } else {
+                        print("Failed to load image: \(error?.localizedDescription ?? "Unknown error")")
+                    }
+                }
+            }
+        }
+    }
 
 
     func getDocumentsDirectory() -> URL {

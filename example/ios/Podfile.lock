@@ -1,4 +1,6 @@
 PODS:
+  - camera_avfoundation (0.0.1):
+    - Flutter
   - document_scanner (1.0.0):
     - Flutter
   - Flutter (1.0.0)
@@ -9,12 +11,15 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - document_scanner (from `.symlinks/plugins/document_scanner/ios`)
   - Flutter (from `Flutter`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
 
 EXTERNAL SOURCES:
+  camera_avfoundation:
+    :path: ".symlinks/plugins/camera_avfoundation/ios"
   document_scanner:
     :path: ".symlinks/plugins/document_scanner/ios"
   Flutter:
@@ -25,11 +30,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
-  document_scanner: 7cb9bd173f7cc7b11696dde98d01492187fc3a67
+  camera_avfoundation: dd002b0330f4981e1bbcb46ae9b62829237459a4
+  document_scanner: 41741f796e2b71cf4e1064f552dd4fa0b2330921
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  permission_handler_apple: 036b856153a2b1f61f21030ff725f3e6fece2b78
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
 
-PODFILE CHECKSUM: e78c989774f3b5b54daf69ce13097109fe4b0da3
+PODFILE CHECKSUM: b82c36a8c737fd2bdce3ad39d86f81344afb266a
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
