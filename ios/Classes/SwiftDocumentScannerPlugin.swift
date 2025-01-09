@@ -1,5 +1,6 @@
 import Flutter
 import UIKit
+import SwiftUI
 import Vision
 import VisionKit
 
