@@ -54,13 +54,42 @@
             android:layout_gravity="end"/>
     </androidx.appcompat.widget.Toolbar>
 
+    <LinearLayout
+        android:id="@+id/filename_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        android:padding="16dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+      <TextView
+            android:id="@+id/filename_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/txt_filename"
+            android:textSize="18sp"
+            android:textColor="@android:color/white"
+            android:gravity="center_vertical"/>
+
+        <ImageButton
+            android:id="@+id/rename_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit"
+            android:backgroundTint="@android:color/transparent"
+            android:contentDescription="@string/txt_back"
+            android:gravity="center_vertical" />
+    </LinearLayout>
+
+
     <!-- Main Carousel for Image Preview -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/preview_carousel"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintTop_toBottomOf="@id/filename_layout"
         app:layout_constraintBottom_toTopOf="@id/lyt_bottom_layout"
         android:clipToPadding="false"
         android:scrollbars="none"/>

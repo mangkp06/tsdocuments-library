@@ -125,7 +125,9 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             if (error != null) {
                                 pendingResult?.error("ERROR", "error - $error", null)
                             } else {
-                                // get an array with scanned document file paths
+
+                                Log.d("FROM ANDROID", "$data");
+
                                 val croppedImageResults =
                                     data?.getStringArrayListExtra("croppedImageResults")?.toList()
                                         ?: let {
@@ -133,13 +135,17 @@ class DocumentScannerPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                             return@ActivityResultListener true
                                         }
 
-                                // return a list of file paths
-                                // removing file uri prefix as Flutter file will have problems with it
-                                val successResponse = croppedImageResults.map {
-                                    it.removePrefix("file://")
-                                }.toList()
-                                // trigger the success event handler with an array of cropped images
+                                val fileName = data?.getStringExtra("filename") ?: ""
+                                Log.d("FROM ANDROID filename",fileName);
+
+                                val successResponse = mapOf(
+                                    "croppedImageResults" to croppedImageResults.map { it.removePrefix("file://") },
+                                    "filename" to fileName
+                                )
+
+                                // Trigger the success event handler with both the cropped images and the filename
                                 pendingResult?.success(successResponse)
+
                             }
                             handled = true
                         }

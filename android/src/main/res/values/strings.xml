@@ -8,4 +8,6 @@
     <string name="txt_preview">Preview</string>
     <string name="txt_done">Done</string>
     <string name="txt_retake">Retake</string>
+    <string name="txt_rename">Rename</string>
+    <string name="txt_filename">filename</string>
 </resources>

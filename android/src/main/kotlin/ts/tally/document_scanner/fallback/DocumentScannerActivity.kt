@@ -7,13 +7,16 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import android.icu.text.IDNA.Info
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
@@ -58,6 +61,7 @@ import ts.tally.document_scanner.fallback.utils.DocumentUtil
 import ts.tally.document_scanner.fallback.utils.FileUtil
 import ts.tally.document_scanner.fallback.utils.ImageUtil
 import java.io.File
+import androidx.appcompat.app.AlertDialog
 
 
 /**
@@ -107,6 +111,10 @@ class DocumentScannerActivity : AppCompatActivity() {
     private lateinit var binding : ActivityImagePreviewBinding
 
     private lateinit var pagerTextView : TextView
+
+    fun shortenFileName(filename: String, maxLength: Int = 20): String {
+        return if (filename.length > maxLength) filename.take(maxLength) + "..." else filename
+    }
 
 
     // Sample list of image URLs or resource IDs
@@ -161,8 +169,6 @@ class DocumentScannerActivity : AppCompatActivity() {
             }
 
             document = Document(documentPath, null, photo.width, photo.height, corners)
-
-
             // user is allowed to move corners to make corrections
             try {
                 // set preview image height based off of photo dimensions
@@ -203,6 +209,7 @@ class DocumentScannerActivity : AppCompatActivity() {
     private lateinit var imageView: ImageCropView
     private var selectedPosition : Int = 0
     private var focusedPosition : Int = 0
+    private var fileName : String = ""
 
     @SuppressLint("NotifyDataSetChanged")
     private val documentUtil = DocumentProviderUtil(
@@ -219,8 +226,21 @@ class DocumentScannerActivity : AppCompatActivity() {
     )
 
     private fun openDocumentAfterSelection(filePath: String?) {
-        Log.e("FROM ANDROID", "openDocumentAfterSelection " + filePath);
+        Log.d("FROM ANDROID", "openDocumentAfterSelection " + filePath);
+
+        if(fileName.isEmpty()){
+            Log.e("FROM ANDROID", "FileName empty $fileName");
+
+            fileName = File(filePath ?: "").name
+
+            val filenameTextView: TextView = findViewById(R.id.filename_text)
+            filenameTextView.text = shortenFileName(fileName)
+        }
+        updateUI()
+
         if (FileUtil().getMimeType(filePath) == "application/pdf") {
+
+            Log.d("pdf", "pdf")
             val results = arrayListOf<String>()
             filePath?.let { results.add(it) }
             setResult(
@@ -412,6 +432,12 @@ class DocumentScannerActivity : AppCompatActivity() {
         pagerTextView = findViewById(
             R.id.txt_pager
         )
+
+        val filenameTextView: TextView = findViewById(R.id.filename_text)
+        val renameButton: ImageButton = findViewById(R.id.rename_button)
+        renameButton.setOnClickListener {
+            showRenameDialog()
+        }
 
         val bottomNavigationView: BottomNavigationView = findViewById(R.id.bottom_navigation)
         bottomNavigationView.deselectAllItems()
@@ -621,6 +647,7 @@ class DocumentScannerActivity : AppCompatActivity() {
         document = null
         documentAction = actionType
         if (importedFilePath != null) {
+
             openDocumentAfterSelection(importedFilePath)
         } else {
             val documentProviderType = when {
@@ -762,6 +789,32 @@ class DocumentScannerActivity : AppCompatActivity() {
         cropDocumentAndFinishIntent()
     }
 
+    private fun showRenameDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_rename, null)
+        val editText = dialogView.findViewById<EditText>(R.id.edit_text_rename)
+        editText.setText(fileName)
+
+        val dialog = AlertDialog.Builder(this)
+            .setTitle("Rename Document")
+            .setView(dialogView)
+            .setPositiveButton("Rename") { dialogInterface, _ ->
+                val newFilename = editText.text.toString().trim()
+
+                if (newFilename.isNotEmpty()) {
+                    fileName = newFilename
+                    val filenameTextView: TextView = findViewById(
+                        R.id.filename_text)
+                    filenameTextView.text = shortenFileName(fileName);
+                    updateUI()
+                }
+                dialogInterface.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
     /**
      * This gets called when a user presses the retake photo button. The user presses this in
      * case the original document photo isn't good, and they need to take it again.
@@ -804,12 +857,16 @@ class DocumentScannerActivity : AppCompatActivity() {
 
             document.croppedPhotoUri?.let { croppedImageResults.add(it) }
         }
+        Log.d("final output","$croppedImageResults");
+        Log.d("final output filename",fileName);
 
-        // return array of cropped document photo file paths
         setResult(
             Activity.RESULT_OK,
-            Intent().putExtra("croppedImageResults", croppedImageResults)
-        )
+            Intent().apply {
+                putExtra("croppedImageResults",croppedImageResults)
+                putExtra("filename",fileName)
+            }
+        );
         finish()
     }
 
@@ -982,6 +1039,7 @@ class DocumentScannerActivity : AppCompatActivity() {
                             .load(document.originalPhotoFilePath)
                             .into(binding.imageView)
                     }
+                    binding.addPageText.isVisible = false
                     binding.imageView.setOnClickListener {
                         // Handle adding new image action
                         scrollPreviewCarouselToPosition(position)
@@ -989,6 +1047,7 @@ class DocumentScannerActivity : AppCompatActivity() {
                 } else {
                     Log.e("FROM ANDROID", "" + maxNumDocuments + " --> " + images.count());
                     binding.imageView.isVisible = maxNumDocuments > images.count()
+                    binding.addPageText.isVisible = maxNumDocuments > images.count()
 
                     binding.imageView.setImageResource(R.drawable.ic_add)
                     binding.thumbnailCard.strokeWidth = 2
@@ -997,6 +1056,11 @@ class DocumentScannerActivity : AppCompatActivity() {
                     binding.thumbnailCard.scaleY = 0.85f
 //                    binding.imageView.setStrokeColorResource(R.color.lightGray)
 //                    binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
+
+                    binding.addPageText.setText("Add page")
+                    binding.addPageText.isVisible = true
+                    binding.addPageText.setPadding(0, 10, 0, 0)
+
                     binding.imageView.setOnClickListener {
                         // Handle adding new image action
                         addNewImage()
