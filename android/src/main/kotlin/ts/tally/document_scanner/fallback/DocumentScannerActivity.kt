@@ -231,7 +231,7 @@ class DocumentScannerActivity : AppCompatActivity() {
         if(fileName.isEmpty()){
             Log.e("FROM ANDROID", "FileName empty $fileName");
 
-            fileName = File(filePath ?: "").name
+            fileName = File(filePath ?: "").nameWithoutExtension
 
             val filenameTextView: TextView = findViewById(R.id.filename_text)
             filenameTextView.text = shortenFileName(fileName)
@@ -336,7 +336,16 @@ class DocumentScannerActivity : AppCompatActivity() {
         override fun handleOnBackPressed() {
             Log.e("FROM ANDROID", "HANDLE BACK")
 
-            showCroppingLayout(false)
+//            showCroppingLayout(false)
+            if (cropLayout?.isVisible == true) {
+                // If the user is currently in cropping layout
+                Log.e("FROM ANDROID", "HANDLE BACK - Cropping Layout")
+                showCroppingLayout(false)
+            } else {
+                // If the user is on the main screen
+                Log.e("FROM ANDROID", "HANDLE BACK - Main Screen")
+                onClickCancel()  // Call the function that shows the discard dialog
+            }
         }
     }
 
@@ -518,7 +527,7 @@ class DocumentScannerActivity : AppCompatActivity() {
     }
 
     private fun showCroppingLayout(show: Boolean) {
-        backCallback.isEnabled = show && documents.isNotEmpty()
+        backCallback.isEnabled = documents.isNotEmpty()
 
         previewLayout?.isVisible = !show
         cropLayout?.isVisible = show
@@ -741,6 +750,7 @@ class DocumentScannerActivity : AppCompatActivity() {
             "${position+1}/${documents.count()}".also { pagerTextView.text = it }
 
             binding.previewCarousel.adapter?.notifyDataSetChanged()
+
             binding.thumbnailCarousel.adapter?.notifyDataSetChanged()
         } else {
             focusedPosition = when {
@@ -750,6 +760,7 @@ class DocumentScannerActivity : AppCompatActivity() {
             "${focusedPosition+1}/${documents.count()}".also { pagerTextView.text = it }
 
             binding.previewCarousel.adapter?.notifyDataSetChanged()
+
             binding.thumbnailCarousel.adapter?.notifyDataSetChanged()
         }
     }
@@ -806,6 +817,7 @@ class DocumentScannerActivity : AppCompatActivity() {
                         R.id.filename_text)
                     filenameTextView.text = shortenFileName(fileName);
                     updateUI()
+
                 }
                 dialogInterface.dismiss()
             }
@@ -813,6 +825,8 @@ class DocumentScannerActivity : AppCompatActivity() {
             .create()
 
         dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(ContextCompat.getColor(this, R.color.colorPrimary))
+
     }
 
     /**
@@ -982,13 +996,16 @@ class DocumentScannerActivity : AppCompatActivity() {
 
         inner class PreviewViewHolder(val binding: PreviewCarouselBinding) : RecyclerView.ViewHolder(binding.root) {
             fun bind(document: Document) {
+                val imageSize = 500
                 if (document.croppedPhotoUri != null) {
                     Glide.with(context)
                         .load(document.croppedPhotoUri)
+                       // .override(imageSize, imageSize)
                         .into(binding.imageView)
                 } else {
                     Glide.with(context)
                         .load(document.originalPhotoFilePath)
+                        //.override(imageSize, imageSize)
                         .into(binding.imageView)
                 }
             }
@@ -1045,7 +1062,7 @@ class DocumentScannerActivity : AppCompatActivity() {
                         scrollPreviewCarouselToPosition(position)
                     }
                 } else {
-                    Log.e("FROM ANDROID", "" + maxNumDocuments + " --> " + images.count());
+                    Log.e("FROM ANDROID", "hhhh" + maxNumDocuments + " --> " + images.count());
                     binding.imageView.isVisible = maxNumDocuments > images.count()
                     binding.addPageText.isVisible = maxNumDocuments > images.count()
 
@@ -1056,11 +1073,11 @@ class DocumentScannerActivity : AppCompatActivity() {
                     binding.thumbnailCard.scaleY = 0.85f
 //                    binding.imageView.setStrokeColorResource(R.color.lightGray)
 //                    binding.imageView.setStrokeWidthResource(R.dimen.thumbnail_stroke_width)
-
+                    Log.e("add page","add page");
                     binding.addPageText.setText("Add page")
-                    binding.addPageText.isVisible = true
-                    binding.addPageText.setPadding(0, 10, 0, 0)
-
+                //    binding.addPageText.isVisible = true
+                    binding.addPageText.setPadding(0, 5, 0, 0)
+                    Log.e("From Android", "${binding.addPageText.isVisible}" );
                     binding.imageView.setOnClickListener {
                         // Handle adding new image action
                         addNewImage()

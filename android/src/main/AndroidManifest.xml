@@ -8,7 +8,8 @@
     
     <uses-feature android:name="android.hardware.camera"
                   android:required="true" />
-    <application android:theme="@style/Theme.AppCompat.NoActionBar">
+    <application android:theme="@style/Theme.AppCompat.NoActionBar" android:enableOnBackInvokedCallback="true">
+
         <activity
             android:name=".fallback.DocumentScannerActivity"
             android:configChanges="orientation|screenSize"

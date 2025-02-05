@@ -7,11 +7,12 @@
     android:theme="@style/Theme.Material3.Dark.NoActionBar"
     android:background="@color/black">
 
-    <include android:id="@+id/lyt_crop_layout"
+    <include
+        android:id="@+id/lyt_crop_layout"
         layout="@layout/layout_image_crop"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:visibility="gone"></include>
+        android:visibility="gone" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/lyt_preview_layout"
@@ -62,7 +63,10 @@
         android:padding="16dp"
         android:orientation="horizontal"
         android:gravity="center">
-
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
       <TextView
             android:id="@+id/filename_text"
             android:layout_width="wrap_content"
@@ -71,6 +75,12 @@
             android:textSize="18sp"
             android:textColor="@android:color/white"
             android:gravity="center_vertical"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/white"
+            android:layout_marginTop="4dp"/>
+        </LinearLayout>
 
         <ImageButton
             android:id="@+id/rename_button"
@@ -79,8 +89,13 @@
             android:src="@drawable/ic_edit"
             android:backgroundTint="@android:color/transparent"
             android:contentDescription="@string/txt_back"
-            android:gravity="center_vertical" />
+            android:gravity="center" />
+
     </LinearLayout>
+
+
+
+
 
 
     <!-- Main Carousel for Image Preview -->
